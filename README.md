@@ -2,6 +2,43 @@
 
 > A collection of best practices for ASP.NET Core Web API/App design. Short, brief and effective.
 
+## Use of `OneOf`
+
+* [OneOf NuGet](https://www.nuget.org/packages/OneOf)
+* [OneOf.SourceGenerators NuGet](https://www.nuget.org/packages/OneOf.SourceGenerator/)
+* [Language-Ext](https://github.com/louthy/language-ext) could also provide similar functionality.
+* Use `SomethingCoproduct` pattern, see below.
+
+We can use `OneOf.SourceGenerators` NuGet to simplify API contracts from
+
+```csharp
+interface IMovieService
+{
+    OneOf<Movie, NotFound, ValidationFailed> Update(Movie movie);
+}
+```
+
+to this implicitly generated versions with the coproduct pattern
+
+```csharp
+interface IMovieService
+{
+    MovieUpdateCoproduct Update(Movie movie);
+}
+
+[GenerateOneOf]
+public partial class MovieUpdateCoproduct : OneOfBase<Movie, NotFound, ValidationFailed>
+{
+}
+```
+
+## Source generated Mediator
+
+* Use [Mediator NuGet](https://github.com/martinothamar/Mediator)
+* ⬆️ is a source generated version replacement for [`MediatR` NuGet package](https://github.com/jbogard/MediatR).
+* Based on two NuGet package [Mediator.Abstractions](https://www.nuget.org/packages/Mediator.Abstractions/) & [Mediator.SourceGenerator](https://www.nuget.org/packages/Mediator.SourceGenerator/)
+
+
 ## API design
 
 * Design API from consumer perspective, not DB perspective. If you are selling books, you should have Get Books, not Get Products.
@@ -219,5 +256,7 @@ The object can be cached due to property `totalBooks` that can change.
 
 ## Links
 
+* [ENG] [Using MediatR in .NET? Maybe replace it with this](https://www.youtube.com/watch?v=aaFLtcf8cO4)
+* [ENG] [How to use Discriminated Unions Today in C#](https://www.youtube.com/watch?v=7z-xjijYfcI)
 * [CZE] [Nejčastější nedostatky API](https://www.youtube.com/watch?v=gGeM1MX6Co8)
 * [CZE] [Přerušení HTTP request a cancellation tokens](https://www.youtube.com/watch?v=tXgNHmp64e8)

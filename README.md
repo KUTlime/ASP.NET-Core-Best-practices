@@ -38,6 +38,19 @@ public partial class MovieUpdateCoproduct : OneOfBase<Movie, NotFound, Validatio
 * ⬆️ is a source generated version replacement for [`MediatR` NuGet package](https://github.com/jbogard/MediatR).
 * Based on two NuGet package [Mediator.Abstractions](https://www.nuget.org/packages/Mediator.Abstractions/) & [Mediator.SourceGenerator](https://www.nuget.org/packages/Mediator.SourceGenerator/)
 
+## Source generated mapping with Mapperly
+
+* Use [Mapperly](https://github.com/riok/mapperly) for fast, no overhead mapping.
+* [Docs](https://mapperly.riok.app/)
+
+```csharp
+[Mapper]
+public partial class Mapper
+{
+    [MapProperty(nameof(TicketEntity.UniqueId), nameof(Ticket.Id))]
+    public partial Ticket Map(TicketEntity entity);
+}
+```
 
 ## API design
 

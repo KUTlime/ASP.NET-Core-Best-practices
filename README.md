@@ -52,6 +52,96 @@ public partial class Mapper
 }
 ```
 
+## Configuration extraction from `appsettings.json`
+
+See this `JSON` settings
+
+```json
+"Templates": {
+    "WindowsServer2022": {
+      "Version": "22",
+      "Release": "00",
+    },
+    "WindowsServer2019": {
+      "Version": "19",
+      "Release": "01",
+    },
+    "WindowsServer2016": {
+      "Version": "16",
+      "Release": "02",
+    }
+  }
+```
+
+This gets converted into C# classes
+
+```csharp
+// In Application layer
+[UsedImplicitly]
+public class TemplateOptions
+{
+    public required string Version { get; init; }
+
+    public required string Release { get; init; }
+}
+
+public class TemplatesOptions
+{
+    [Required]
+    public required TemplateOptions WindowsServer2022 { get; init; }
+
+    [Required]
+    public required TemplateOptions WindowsServer2019 { get; init; }
+
+    [Required]
+    public required TemplateOptions WindowsServer2016 { get; init; }
+}
+
+// Constructor injection by
+public class TemplateFactory(IOptions<TemplatesOptions> templatesOptions) {/*...*/}
+```
+
+### DI configuration
+
+```csharp
+// In the Web layer
+public static class Sections
+{
+    public static string Templates => "Templates";
+}
+
+// Program.cs
+_ = builder
+    .Services
+    .AddServiceOptions(builder.Configuration)
+
+// Also in Web layer
+public static class DependencyInjection
+{
+    public static IServiceCollection AddServiceOptions(this IServiceCollection services, IConfiguration configuration)
+    {
+        _ = services
+            .AddSingleton<IValidateOptions<TemplatesOptions>, TemplatesOptionsValidator>()
+            .Configure<TemplatesOptions>(configuration.GetRequiredSection(Sections.Templates))
+            .AddOptions<TemplatesOptions>()
+            .BindConfiguration(Sections.Templates)
+            .ValidateDataAnnotations()
+            .ValidateOnStart()
+            ;
+
+        return services;
+    }
+}
+```
+
+### Custom validation
+
+```csharp
+// In the Web layer
+[UsedImplicitly]
+public class TemplatesOptionsValidator(IConfiguration config) : IValidateOptions<TemplatesOptions> {/*...*/}
+```
+
 ## API design
 
 * Design API from consumer perspective, not DB perspective. If you are selling books, you should have Get Books, not Get Products.
